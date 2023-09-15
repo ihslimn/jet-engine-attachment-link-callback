@@ -27,34 +27,10 @@ function jet_engine_add_attachment_link_callback( $callbacks ) {
 
 function jet_engine_get_attachment_file_link( $attachment_id, $display_name = 'file_name', $label = '', $is_external = '' ) {
 
-	$url = wp_get_attachment_url( $attachment_id );
-
-	switch ( $display_name ) {
-		case 'post_title':
-			$name = get_the_title( $attachment_id );
-			break;
-
-		case 'current_post_title':
-			$name = get_the_title( get_the_ID() );
-			break;
-
-		case 'parent_post_title':
-			$parent_id = wp_get_post_parent_id( $attachment_id );
-
-			if ( ! $parent_id ) {
-				$parent_id = get_the_ID();
-			}
-
-			$name = get_the_title( $parent_id );
-			break;
-
-		case 'custom':
-			$name = $label;
-			break;
-
-		default:
-			$name = basename( $url );
-			break;
+	if ( is_scalar( $attachment_id ) && false !== strpos( $attachment_id, ',' ) ) {
+		$attachment_id = explode( ',', $attachment_id );	
+	} elseif ( empty( $attachment_id['id'] ) ) {
+		$attachment_id = array( $attachment_id );
 	}
 
 	$target      = '';
@@ -64,7 +40,48 @@ function jet_engine_get_attachment_file_link( $attachment_id, $display_name = 'f
 		$target = ' target="_blank"';
 	}
 
-	return sprintf( '<a href="%1$s"%3$s>%2$s</a>', $url, $name, $target );
+	$links = array();
+
+	foreach ( $attachment_id as $key => $value ) {
+
+		$file_data = \Jet_Engine_Tools::get_attachment_image_data_array( $value, 'all' );
+
+		$url[$key] = $file_data['url'];
+		$id = $file_data['id'];
+
+		switch ( $display_name ) {
+			case 'post_title':
+				$name = get_the_title( $id );
+				break;
+
+			case 'current_post_title':
+				$name = get_the_title( get_the_ID() );
+				break;
+
+			case 'parent_post_title':
+				$parent_id = wp_get_post_parent_id( $id );
+
+				if ( ! $parent_id ) {
+					$parent_id = get_the_ID();
+				}
+
+				$name = get_the_title( $parent_id );
+				break;
+
+			case 'custom':
+				$name = $label;
+				break;
+
+			default:
+				$name = basename( $url[ $key ] );
+				break;
+		}
+
+		$links[] = sprintf( '<a href="%1$s"%3$s>%2$s</a>', $url[ $key ], $name, $target );
+
+	}
+
+	return implode( '<br>', $links );
 
 }
 
