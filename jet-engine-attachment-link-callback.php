@@ -46,6 +46,10 @@ function jet_engine_get_attachment_file_link( $attachment_id, $display_name = 'f
 
 		$file_data = \Jet_Engine_Tools::get_attachment_image_data_array( $value, 'all' );
 
+		if ( empty( $file_data['url'] ) ) {
+			continue;
+		}
+		
 		$url[$key] = $file_data['url'];
 		$id = $file_data['id'];
 
