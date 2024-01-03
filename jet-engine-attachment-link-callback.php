@@ -29,7 +29,7 @@ function jet_engine_get_attachment_file_link( $attachment_id, $display_name = 'f
 
 	if ( is_scalar( $attachment_id ) && false !== strpos( $attachment_id, ',' ) ) {
 		$attachment_id = explode( ',', $attachment_id );	
-	} elseif ( ! empty( $attachment_id['id'] ) ) {
+	} elseif ( ! empty( $attachment_id['id'] ) || ! is_array( $attachment_id ) ) {
 		$attachment_id = array( $attachment_id );
 	}
 
