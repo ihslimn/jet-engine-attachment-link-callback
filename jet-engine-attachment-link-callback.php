@@ -25,7 +25,7 @@ function jet_engine_add_attachment_link_callback( $callbacks ) {
 	return $callbacks;
 }
 
-function jet_engine_get_attachment_file_link( $attachment_id, $display_name = 'file_name', $label = '', $is_external = '' ) {
+function jet_engine_get_attachment_file_link( $attachment_id, $display_name = 'file_name', $label = '', $is_external = '', $is_download = '' ) {
 
 	if ( is_scalar( $attachment_id ) && false !== strpos( $attachment_id, ',' ) ) {
 		$attachment_id = explode( ',', $attachment_id );	
@@ -38,6 +38,13 @@ function jet_engine_get_attachment_file_link( $attachment_id, $display_name = 'f
 
 	if ( $is_external ) {
 		$target = ' target="_blank"';
+	}
+	
+	$download = '';
+	$is_download = filter_var( $is_download, FILTER_VALIDATE_BOOLEAN );
+
+	if ( $is_download ) {
+		$download = ' download';
 	}
 
 	$links = array();
@@ -81,7 +88,7 @@ function jet_engine_get_attachment_file_link( $attachment_id, $display_name = 'f
 				break;
 		}
 
-		$links[] = sprintf( '<a href="%1$s"%3$s>%2$s</a>', $url[ $key ], $name, $target );
+		$links[] = sprintf( '<a href="%1$s"%3$s%4$s>%2$s</a>', $url[ $key ], $name, $target, $download );
 
 	}
 
@@ -95,6 +102,7 @@ function jet_engine_add_attachment_link_callback_args( $args, $callback, $settin
 		$args[] = isset( $settings['jet_attachment_name'] ) ? $settings['jet_attachment_name'] : 'file_name';
 		$args[] = isset( $settings['jet_attachment_label'] ) ? $settings['jet_attachment_label'] : '';
 		$args[] = isset( $settings['jet_attachment_is_external'] ) ? $settings['jet_attachment_is_external'] : '';
+		$args[] = isset( $settings['jet_attachment_is_download'] ) ? $settings['jet_attachment_is_download'] : '';
 	}
 
 	return $args;
@@ -137,6 +145,16 @@ function jet_engine_add_attachment_link_callback_controls( $args = array() ) {
 
 	$args['jet_attachment_is_external'] = array(
 		'label'       => esc_html__( 'Open in new window', 'jet-engine' ),
+		'type'        => 'switcher',
+		'default'     => '',
+		'condition'   => array(
+			'dynamic_field_filter' => 'yes',
+			'filter_callback'      => array( 'jet_engine_get_attachment_file_link' ),
+		),
+	);
+
+	$args['jet_attachment_is_download'] = array(
+		'label'       => esc_html__( 'Download', 'jet-engine' ),
 		'type'        => 'switcher',
 		'default'     => '',
 		'condition'   => array(
